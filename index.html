@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Task Planner - AI-Powered Goal Breakdown</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .input-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .input-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: block;
+            font-size: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+        }
+
+        .btn-secondary {
+            background: #f7fafc;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #edf2f7;
+        }
+
+        .btn-danger {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .btn-danger:hover {
+            background: #feb2b2;
+        }
+
+        .error-message {
+            color: #e53e3e;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .plan-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+
+        .plan-title {
+            font-size: 2rem;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .plan-summary {
+            color: #718096;
+            font-size: 1rem;
+        }
+
+        .plan-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .metric-card.indigo {
+            background: #ebf4ff;
+        }
+
+        .metric-card.purple {
+            background: #faf5ff;
+        }
+
+        .metric-card.pink {
+            background: #fff5f7;
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .metric-card.indigo .metric-label {
+            color: #4c51bf;
+        }
+
+        .metric-card.purple .metric-label {
+            color: #6b46c1;
+        }
+
+        .metric-card.pink .metric-label {
+            color: #d53f8c;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .metric-card.indigo .metric-value {
+            color: #2c5282;
+        }
+
+        .metric-card.purple .metric-value {
+            color: #553c9a;
+        }
+
+        .metric-card.pink .metric-value {
+            color: #97266d;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .task-item {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .task-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .task-header {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .task-number {
+            width: 40px;
+            height: 40px;
+            background: #ebf4ff;
+            color: #4c51bf;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .task-description {
+            color: #4a5568;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .task-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid;
+        }
+
+        .badge.critical {
+            background: #fff5f5;
+            color: #c53030;
+            border-color: #feb2b2;
+        }
+
+        .badge.high {
+            background: #fffaf0;
+            color: #c05621;
+            border-color: #fbd38d;
+        }
+
+        .badge.medium {
+            background: #fffff0;
+            color: #b7791f;
+            border-color: #faf089;
+        }
+
+        .badge.low {
+            background: #f0fff4;
+            color: #276749;
+            border-color: #9ae6b4;
+        }
+
+        .badge.phase {
+            background: #ebf8ff;
+            color: #2c5282;
+            border-color: #bee3f8;
+        }
+
+        .task-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .task-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #4a5568;
+            font-size: 0.875rem;
+        }
+
+        .task-detail svg {
+            width: 16px;
+            height: 16px;
+            opacity: 0.6;
+        }
+
+        .dependencies {
+            margin-top: 10px;
+            font-size: 0.75rem;
+            color: #718096;
+        }
+
+        .saved-plans {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .saved-plans h2 {
+            font-size: 1.5rem;
+            color: #2d3748;
+            margin-bottom: 20px;
+        }
+
+        .saved-plan-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .saved-plan-item:hover {
+            background: #edf2f7;
+        }
+
+        .saved-plan-info h3 {
+            font-size: 1.1rem;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .saved-plan-info p {
+            color: #718096;
+            font-size: 0.875rem;
+        }
+
+        .saved-plan-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.875rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .plan-header {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .task-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎯 Smart Task Planner</h1>
+            <p>AI-powered goal breakdown with intelligent task planning</p>
+        </div>
+
+        <!-- Input Form -->
+        <div class="input-card">
+            <label class="input-label">What's your goal?</label>
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="goalInput" 
+                    class="input-field" 
+                    placeholder="e.g., Launch a product in 2 weeks, Learn Python in 30 days"
+                >
+                <button id="generateBtn" class="btn btn-primary">
+                    Generate Plan
+                </button>
+            </div>
+            <div id="errorMessage" class="error-message hidden">
+                ⚠️ <span id="errorText"></span>
+            </div>
+        </div>
+
+        <!-- Task Plan Display -->
+        <div id="planCard" class="plan-card hidden">
+            <div class="plan-header">
+                <div>
+                    <h2 class="plan-title" id="planGoal"></h2>
+                    <p class="plan-summary" id="planSummary"></p>
+                </div>
+                <div class="plan-actions">
+                    <button id="exportBtn" class="btn btn-secondary btn-small">
+                        📥 Export
+                    </button>
+                    <button id="saveBtn" class="btn btn-success btn-small">
+                        ✓ Save Plan
+                    </button>
+                </div>
+            </div>
+
+            <!-- Metrics -->
+            <div class="metrics-grid">
+                <div class="metric-card indigo">
+                    <div class="metric-label">Total Tasks</div>
+                    <div class="metric-value" id="totalTasks">0</div>
+                </div>
+                <div class="metric-card purple">
+                    <div class="metric-label">Duration</div>
+                    <div class="metric-value" id="totalDuration">0 days</div>
+                </div>
+                <div class="metric-card pink">
+                    <div class="metric-label">Completion Date</div>
+                    <div class="metric-value" id="completionDate">-</div>
+                </div>
+            </div>
+
+            <!-- Task List -->
+            <div id="taskList" class="task-list"></div>
+        </div>
+
+        <!-- Saved Plans -->
+        <div id="savedPlansSection" class="saved-plans hidden">
+            <h2>📚 Saved Plans</h2>
+            <div id="savedPlansList"></div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentPlan = null;
+        let savedPlans = [];
+
+        // DOM Elements
+        const goalInput = document.getElementById('goalInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        const planCard = document.getElementById('planCard');
+        const saveBtn = document.getElementById('saveBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const savedPlansSection = document.getElementById('savedPlansSection');
+
+        // Event Listeners
+        generateBtn.addEventListener('click', generatePlan);
+        saveBtn.addEventListener('click', savePlan);
+        exportBtn.addEventListener('click', exportPlan);
+        goalInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') generatePlan();
+        });
+
+        // Main Functions
+        async function generatePlan() {
+            const goal = goalInput.value.trim();
+            
+            if (!goal) {
+                showError('Please enter a goal');
+                return;
+            }
+
+            hideError();
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<div class="spinner"></div> Analyzing...';
+
+            try {
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                const plan = analyzeAndBreakdownGoal(goal);
+                currentPlan = plan;
+                displayPlan(plan);
+                
+            } catch (error) {
+                showError('Failed to generate plan. Please try again.');
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Generate Plan';
+            }
+        }
+
+        function analyzeAndBreakdownGoal(goalText) {
+            const lowerGoal = goalText.toLowerCase();
+            
+            // Extract timeline
+            let totalDays = 14;
+            const timeMatch = goalText.match(/(\d+)\s*(week|day|month)/i);
+            if (timeMatch) {
+                const num = parseInt(timeMatch[1]);
+                const unit = timeMatch[2].toLowerCase();
+                const multipliers = { day: 1, week: 7, month: 30 };
+                totalDays = num * (multipliers[unit] || 1);
+            }
+
+            let tasks = [];
+            const today = new Date();
+
+            if (lowerGoal.includes('product') || lowerGoal.includes('launch')) {
+                tasks = [
+                    {
+                        name: 'Market Research & Analysis',
+                        description: 'Conduct competitive analysis, identify target audience, analyze market trends',
+                        duration: Math.ceil(totalDays * 0.15),
+                        dependencies: [],
+                        priority: 'high',
+                        phase: 'Planning'
+                    },
+                    {
+                        name: 'Define Product Requirements',
+                        description: 'Create detailed product specifications, user stories, and acceptance criteria',
+                        duration: Math.ceil(totalDays * 0.15),
+                        dependencies: [1],
+                        priority: 'high',
+                        phase: 'Planning'
+                    },
+                    {
+                        name: 'Design & Prototyping',
+                        description: 'Create wireframes, mockups, and interactive prototypes',
+                        duration: Math.ceil(totalDays * 0.20),
+                        dependencies: [2],
+                        priority: 'high',
+                        phase: 'Design'
+                    },
+                    {
+                        name: 'Development Sprint',
+                        description: 'Build core features, integrate systems, conduct code reviews',
+                        duration: Math.ceil(totalDays * 0.30),
+                        dependencies: [3],
+                        priority: 'critical',
+                        phase: 'Development'
+                    },
+                    {
+                        name: 'Testing & QA',
+                        description: 'Perform unit testing, integration testing, user acceptance testing',
+                        duration: Math.ceil(totalDays * 0.10),
+                        dependencies: [4],
+                        priority: 'high',
+                        phase: 'Testing'
+                    },
+                    {
+                        name: 'Marketing Material Preparation',
+                        description: 'Create landing page, promotional content, press releases',
+                        duration: Math.ceil(totalDays * 0.15),
+                        dependencies: [2],
+                        priority: 'medium',
+                        phase: 'Marketing'
+                    },
+                    {
+                        name: 'Pre-Launch Beta Testing',
+                        description: 'Conduct beta testing with select users, gather feedback',
+                        duration: Math.ceil(totalDays * 0.08),
+                        dependencies: [5],
+                        priority: 'high',
+                        phase: 'Testing'
+                    },
+                    {
+                        name: 'Final Preparations & Launch',
+                        description: 'Deploy to production, monitor systems, execute marketing campaign',
+                        duration: Math.ceil(totalDays * 0.07),
+                        dependencies: [6, 7],
+                        priority: 'critical',
+                        phase: 'Launch'
+                    }
+                ];
+            } else if (lowerGoal.includes('learn') || lowerGoal.includes('study')) {
+                tasks = [
+                    {
+                        name: 'Resource Collection',
+                        description: 'Gather books, courses, tutorials, and documentation',
+                        duration: Math.ceil(totalDays * 0.10),
+                        dependencies: [],
+                        priority: 'high',
+                        phase: 'Preparation'
+                    },
+                    {
+                        name: 'Foundation Learning',
+                        description: 'Study core concepts and fundamentals',
+                        duration: Math.ceil(totalDays * 0.30),
+                        dependencies: [1],
+                        priority: 'critical',
+                        phase: 'Learning'
+                    },
+                    {
+                        name: 'Practice Exercises',
+                        description: 'Complete hands-on exercises and mini-projects',
+                        duration: Math.ceil(totalDays * 0.25),
+                        dependencies: [2],
+                        priority: 'high',
+                        phase: 'Practice'
+                    },
+                    {
+                        name: 'Advanced Topics',
+                        description: 'Explore advanced concepts and real-world applications',
+                        duration: Math.ceil(totalDays * 0.20),
+                        dependencies: [3],
+                        priority: 'medium',
+                        phase: 'Learning'
+                    },
+                    {
+                        name: 'Final Project',
+                        description: 'Build a comprehensive project to demonstrate mastery',
+                        duration: Math.ceil(totalDays * 0.15),
+                        dependencies: [4],
+                        priority: 'critical',
+                        phase: 'Application'
+                    }
+                ];
+            } else {
+                tasks = [
+                    {
+                        name: 'Goal Analysis & Planning',
+                        description: 'Break down the goal into specific, measurable outcomes',
+                        duration: Math.ceil(totalDays * 0.15),
+                        dependencies: [],
+                        priority: 'high',
+                        phase: 'Planning'
+                    },
+                    {
+                        name: 'Resource Identification',
+                        description: 'Identify required resources, tools, and team members',
+                        duration: Math.ceil(totalDays * 0.10),
+                        dependencies: [1],
+                        priority: 'medium',
+                        phase: 'Planning'
+                    },
+                    {
+                        name: 'Execution Phase 1',
+                        description: 'Begin primary work on core components',
+                        duration: Math.ceil(totalDays * 0.30),
+                        dependencies: [2],
+                        priority: 'critical',
+                        phase: 'Execution'
+                    },
+                    {
+                        name: 'Review & Adjustment',
+                        description: 'Evaluate progress, make necessary adjustments',
+                        duration: Math.ceil(totalDays * 0.15),
+                        dependencies: [3],
+                        priority: 'high',
+                        phase: 'Review'
+                    },
+                    {
+                        name: 'Execution Phase 2',
+                        description: 'Complete remaining tasks and refinements',
+                        duration: Math.ceil(totalDays * 0.20),
+                        dependencies: [4],
+                        priority: 'high',
+                        phase: 'Execution'
+                    },
+                    {
+                        name: 'Final Review & Completion',
+                        description: 'Conduct final checks, document results',
+                        duration: Math.ceil(totalDays * 0.10),
+                        dependencies: [5],
+                        priority: 'medium',
+                        phase: 'Completion'
+                    }
+                ];
+            }
+
+            const tasksWithDates = calculateTimeline(tasks, today);
+            
+            return {
+                id: Date.now(),
+                goal: goalText,
+                totalDuration: totalDays,
+                tasks: tasksWithDates,
+                createdAt: today.toISOString(),
+                summary: `Plan created with ${tasksWithDates.length} tasks spanning ${totalDays} days`
+            };
+        }
+
+        function calculateTimeline(tasks, startDate) {
+            const taskMap = {};
+            
+            return tasks.map((task, index) => {
+                const taskId = index + 1;
+                let taskStartDate = new Date(startDate);
+                
+                if (task.dependencies.length > 0) {
+                    task.dependencies.forEach(depId => {
+                        const depTask = taskMap[depId];
+                        if (depTask && depTask.endDate) {
+                            const depEndDate = new Date(depTask.endDate);
+                            if (depEndDate > taskStartDate) {
+                                taskStartDate = depEndDate;
+                            }
+                        }
+                    });
+                }
+                
+                const taskEndDate = new Date(taskStartDate);
+                taskEndDate.setDate(taskEndDate.getDate() + task.duration);
+                
+                const enrichedTask = {
+                    id: taskId,
+                    ...task,
+                    startDate: taskStartDate.toISOString().split('T')[0],
+                    endDate: taskEndDate.toISOString().split('T')[0],
+                    status: 'pending'
+                };
+                
+                taskMap[taskId] = enrichedTask;
+                return enrichedTask;
+            });
+        }
+
+        function displayPlan(plan) {
+            document.getElementById('planGoal').textContent = plan.goal;
+            document.getElementById('planSummary').textContent = plan.summary;
+            document.getElementById('totalTasks').textContent = plan.tasks.length;
+            document.getElementById('totalDuration').textContent = plan.totalDuration + ' days';
+            document.getElementById('completionDate').textContent = plan.tasks[plan.tasks.length - 1].endDate;
+
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+
+            plan.tasks.forEach((task, index) => {
+                const taskItem = document.createElement('div');
+                taskItem.className = 'task-item';
+                
+                const depText = task.dependencies.length > 0 
+                    ? `<div class="dependencies">Depends on: Task ${task.dependencies.join(', Task ')}</div>`
+                    : '';
+
+                taskItem.innerHTML = `
+                    <div class="task-header">
+                        <div class="task-number">${index + 1}</div>
+                        <div class="task-content">
+                            <h3 class="task-name">${task.name}</h3>
+                            <p class="task-description">${task.description}</p>
+                            <div class="task-badges">
+                                <span class="badge ${task.priority}">${task.priority.toUpperCase()}</span>
+                                <span class="badge phase">${task.phase}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="task-details">
+                        <div class="task-detail">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>Start: ${task.startDate}</span>
+                        </div>
+                        <div class="task-detail">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>End: ${task.endDate}</span>
+                        </div>
+                        <div class="task-detail">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>Duration: ${task.duration} days</span>
+                        </div>
+                    </div>
+                    ${depText}
+                `;
+                
+                taskList.appendChild(taskItem);
+            });
+
+            planCard.classList.remove('hidden');
+        }
+
+        function savePlan() {
+            if (currentPlan) {
+                savedPlans.push(currentPlan);
+                displaySavedPlans();
+                currentPlan = null;
+                planCard.classList.add('hidden');
+                goalInput.value = '';
+            }
+        }
+
+        function displaySavedPlans() {
+            if (savedPlans.length === 0) {
+                savedPlansSection.classList.add('hidden');
+                return;
+            }
+
+            savedPlansSection.classList.remove('hidden');
+            const savedPlansList = document.getElementById('savedPlansList');
+            savedPlansList.innerHTML = '';
+
+            savedPlans.forEach((plan, index) => {
+                const planItem = document.createElement('div');
+                planItem.className = 'saved-plan-item';
+                planItem.innerHTML = `
+                    <div class="saved-plan-info">
+                        <h3>${plan.goal}</h3>
+                        <p>${plan.summary}</p>
+                    </div>
+                    <div class="saved-plan-actions">
+                        <button class="btn btn-primary btn-small" onclick="loadPlan(${index})">View</button>
+                        <button class="btn btn-danger btn-small" onclick="deletePlan(${index})">🗑️</button>
+                    </div>
+                `;
+                savedPlansList.appendChild(planItem);
+            });
+        }
+
+        function loadPlan(index) {
+            currentPlan = savedPlans[index];
+            displayPlan(currentPlan);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deletePlan(index) {
+            savedPlans.splice(index, 1);
+            displaySavedPlans();
+        }
+
+        function exportPlan() {
+            if (!currentPlan) return;
+            
+            const dataStr = JSON.stringify(currentPlan, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `task-plan-${Date.now()}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.remove('hidden');
+        }
+
+        function hideError() {
+            errorMessage.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
